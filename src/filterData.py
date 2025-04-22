@@ -55,7 +55,7 @@ def filter_eeg_data(csv_file):
     return filtered_df
 
 if __name__ == "__main__":
-    segmented_file = 'segmented_data_20250417-003931_v2.csv'
+    segmented_file = '/Users/joaomachado/Desktop/IC_V3_BKP/segmented_data_20250422-184733.csv'
     filtered_data = filter_eeg_data(segmented_file)
     if filtered_data is not None:
         print("Filtering completed successfully!")

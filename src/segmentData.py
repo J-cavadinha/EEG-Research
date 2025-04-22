@@ -37,9 +37,19 @@ def segment_trials(csv_files, min_duration=1.5, max_duration=1.5):
         label_data = df[df['label'] == label].copy()
         print(f"\nProcessing data for label {label}")
         
+        # Calculate sampling rate more robustly
         time_diff = np.diff(label_data['timestamp'].values)
-        sampling_rate = 1 / np.mean(time_diff)
-        samples_per_segment = int(max_duration * sampling_rate)
+        sampling_rate = 1 / np.median(time_diff)  # Using median instead of mean
+        samples_per_segment = max(1, int(max_duration * sampling_rate))  # Ensure at least 1 sample
+        
+        print(f"Time differences stats:")
+        print(f"Mean: {np.mean(time_diff):.4f}s")
+        print(f"Median: {np.median(time_diff):.4f}s")
+        print(f"Samples per segment: {samples_per_segment}")
+        
+        if samples_per_segment == 0:
+            print("Warning: Sample rate too low for the specified duration")
+            continue
         
         total_duration = label_data['timestamp'].max() - label_data['timestamp'].min()
         print(f"Total duration for label {label}: {total_duration:.2f}s")
@@ -70,8 +80,8 @@ def segment_trials(csv_files, min_duration=1.5, max_duration=1.5):
 
 if __name__ == "__main__":
     csv_files = [
-        'eeg_data_20250416-235719.csv',
-        'eeg_data_20250416-235923.csv'
+        '/Users/joaomachado/Desktop/IC_V3_BKP/merged_output_md.csv',
+        '/Users/joaomachado/Desktop/IC_V3_BKP/merged_output_me.csv'
     ]
     segmented_data = segment_trials(csv_files, min_duration=1.5, max_duration=1.5)
     if segmented_data is not None and not segmented_data.empty:
