@@ -4,22 +4,6 @@ from mne.preprocessing import compute_current_source_density
 import numpy as np
 import time
 
-def combine_eeg_files(file1, file2):
-    try:
-        data1 = pd.read_csv(file1)
-        data2 = pd.read_csv(file2)
-        combined_data = pd.concat([data1, data2], ignore_index=True)
-        combined_data = combined_data.sort_values('timestamp').reset_index(drop=True)
-        combined_filename = 'combined_eeg_data.csv'
-        combined_data.to_csv(combined_filename, index=False)
-        return combined_data
-    except FileNotFoundError as e:
-        print(f"Error: One or both files not found - {e}")
-        return None
-    except Exception as e:
-        print(f"Error combining files: {e}")
-        return None
-
 def filter_eeg_data(csv_file):
     try:
         df = pd.read_csv(csv_file)

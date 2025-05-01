@@ -258,8 +258,8 @@ def predict_with_pipeline(X, model, scaler, selector):
     return model.predict(X_selected)
 
 if __name__ == "__main__":
-    input_file = '/Users/joaomachado/Desktop/IC_V3_BKP/eeg_features_reorganized_20250422-191539.csv'
-    n_features = 10  # Número de features a serem selecionadas
+    input_file = '/Users/joaomachado/Desktop/IC_V3/eeg_features_reorganized_20250422-191539.csv'
+    n_features = 12  # Número de features a serem selecionadas
     
     results, feature_counts, final_model, final_scaler, final_selector = train_and_evaluate_models(input_file, n_features)
     
