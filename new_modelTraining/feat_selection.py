@@ -1,0 +1,72 @@
+# feat_selection.py
+import pandas as pd
+import numpy as np
+from sklearn.feature_selection import RFE
+from sklearn.svm import SVC # Assuming SVC is still the desired estimator for RFE
+import time
+
+def create_selector(n_features_to_select=10, actual_n_features=None): # Added actual_n_features
+    """Cria e retorna um seletor RFE"""
+    estimator = SVC(kernel="linear")
+    
+    # Adjust n_features_to_select if it's too high or invalid
+    if actual_n_features is not None:
+        if n_features_to_select <= 0: # Select at least 1 feature or all
+            n_features_to_select = actual_n_features 
+        elif n_features_to_select > actual_n_features:
+            print(f"Aviso (create_selector): n_features_to_select ({n_features_to_select}) "
+                  f"é maior que o número de features disponíveis ({actual_n_features}). "
+                  f"Ajustando para selecionar todas as {actual_n_features} features.")
+            n_features_to_select = actual_n_features
+            
+    # RFE requires n_features_to_select to be less than or equal to number of features
+    # If actual_n_features is not provided, it relies on sklearn's internal checks.
+    return RFE(estimator=estimator, n_features_to_select=n_features_to_select, step=1)
+
+def fit_selector(selector, X, y):
+    """Ajusta o seletor aos dados de treino"""
+    return selector.fit(X, y)
+
+def transform_features(selector, X):
+    """Aplica a seleção de features aos dados"""
+    return selector.transform(X)
+
+def get_selected_feature_indices(selector, feature_names):
+    """Retorna os índices e nomes das features selecionadas"""
+    selected_indices = np.where(selector.support_)[0]
+    selected_names = [feature_names[i] for i in selected_indices]
+    return selected_indices, selected_names
+
+def get_feature_ranking(selector, feature_names):
+    """Retorna o ranking das features"""
+    return [(feature, rank) for feature, rank in zip(feature_names, selector.ranking_)]
+
+def apply_rfe_for_final_model(X, y, feature_names, n_features_to_select=10):
+    """Aplica RFE ao conjunto completo para o modelo final"""
+    try:
+        estimator = SVC(kernel="linear")
+        actual_n_features = X.shape[1]
+
+        # Adjust n_features_to_select
+        if n_features_to_select <= 0:
+            n_features_to_select = actual_n_features
+        elif n_features_to_select > actual_n_features:
+            print(f"Aviso (apply_rfe): n_features_to_select ({n_features_to_select}) "
+                  f"é maior que o número de features disponíveis ({actual_n_features}). "
+                  f"Ajustando para selecionar todas as {actual_n_features} features.")
+            n_features_to_select = actual_n_features
+        
+        if n_features_to_select == actual_n_features:
+            print("Info (apply_rfe): n_features_to_select é igual ao número total de features. "
+                  "RFE selecionará todas as features.")
+        
+        selector = RFE(estimator=estimator, n_features_to_select=n_features_to_select, step=1)
+        selector.fit(X, y)
+
+        selected_indices, selected_names = get_selected_feature_indices(selector, np.array(feature_names)) # Ensure feature_names is array-like for indexing
+        feature_ranking = get_feature_ranking(selector, feature_names)
+
+        return selector, selected_indices, selected_names, feature_ranking
+    except Exception as e:
+        print(f"Erro durante a seleção de features (apply_rfe_for_final_model): {e}")
+        return None, None, None, None
